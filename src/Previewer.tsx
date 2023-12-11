@@ -7,10 +7,17 @@ const graph = {
 };
 const root = "aaa";
 
+const createOutputFilename = () => {
+  const now = new Date();
+  return `visualized-${now.getDate()}${
+    now.getMonth() + 1
+  }${now.getFullYear()}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}.pptx`;
+};
+
 function App() {
   function runDemo() {
     TreeCreator.CreateTree(graph, root).writeFile({
-      fileName: "pptxgenjs-demo-react.pptx",
+      fileName: createOutputFilename(),
     });
   }
 
