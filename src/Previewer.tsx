@@ -5,21 +5,18 @@ const graph = {
   ccc: ["eee", "mmm"],
   ddd: ["fff"],
 };
+const root = "aaa";
 
 function App() {
   function runDemo() {
-    TreeCreator.CreateTree(graph, "aaa").writeFile({
+    TreeCreator.CreateTree(graph, root).writeFile({
       fileName: "pptxgenjs-demo-react.pptx",
     });
   }
 
   return (
-    <button
-      type="button"
-      className="btn btn-success w-100 me-3"
-      onClick={(_ev) => runDemo()}
-    >
-      Run Demo
+    <button type="button" onClick={(_ev) => runDemo()}>
+      Create PPT
     </button>
   );
 }
