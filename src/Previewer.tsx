@@ -2,7 +2,7 @@ import * as TreeCreator from "./BasicPPT";
 const graph = {
   aaa: ["bbb", "ccc"],
   bbb: ["ddd", "gggg"],
-  ccc: ["eee"],
+  ccc: ["eee", "mmm"],
   ddd: ["fff"],
 };
 
