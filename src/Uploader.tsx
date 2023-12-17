@@ -1,6 +1,24 @@
 import React from "react";
 import { parseXLS, ExcelData } from "./xlsParser";
 import { createPresentation, Graph } from "./Previewer";
+
+let rootNode: string | undefined = undefined;
+let fileUploadData: File | undefined;
+
+const setRootNodeName = (e: React.FormEvent<HTMLInputElement>) => {
+  rootNode = e?.currentTarget.value;
+};
+
+const setFileUploadData = (e: React.ChangeEvent<HTMLInputElement>) => {
+  fileUploadData = e?.target?.files?.[0];
+};
+
+const run = () => {
+  if (fileUploadData && rootNode) {
+    parseXLS(fileUploadData, cb);
+  }
+};
+
 const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
   const graph: Graph = {};
   if (data) {
@@ -27,14 +45,14 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
 const cb = (data: ExcelData | undefined) => {
   if (data) {
     const graph = parseXlsAsTree(data);
-    createPresentation(graph, "123");
+    if (rootNode) {
+      createPresentation(graph, rootNode);
+    }
   }
 };
 function Uploader() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files?.[0]) {
-      parseXLS(event?.target?.files?.[0], cb);
-    }
+    setFileUploadData(event);
   };
 
   return (
@@ -45,7 +63,13 @@ function Uploader() {
         name="files[]"
         onChange={handleFileChange}
       />
-      <input type="submit" value="Upload" />
+      <input
+        type="text"
+        name="name"
+        placeholder="מאיפה להתחיל? "
+        onChange={setRootNodeName}
+      />
+      <input type="button" value="סע" onClick={run} />
     </form>
   );
 }

@@ -15,21 +15,3 @@ export function createPresentation(graph: Graph, root: string) {
     fileName: createOutputFilename(),
   });
 }
-
-function App() {
-  const graph = {
-    aaa: ["bbb", "ccc"],
-    bbb: ["ddd", "gggg"],
-    ccc: ["eee", "mmm"],
-    ddd: ["fff"],
-  };
-  const root = "aaa";
-
-  return (
-    <button type="button" onClick={(_ev) => createPresentation(graph, root)}>
-      Create PPT
-    </button>
-  );
-}
-
-export default App;
