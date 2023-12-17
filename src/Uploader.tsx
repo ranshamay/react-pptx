@@ -1,22 +1,14 @@
+// @ts-nocheck
 import React from "react";
 import { parseXLS, ExcelData } from "./xlsParser";
 import { createPresentation, Graph } from "./Previewer";
+import { message, Input } from "antd";
 
+import Upload from "./components/Upload";
 let rootNode: string | undefined = undefined;
-let fileUploadData: File | undefined;
 
 const setRootNodeName = (e: React.FormEvent<HTMLInputElement>) => {
   rootNode = e?.currentTarget.value;
-};
-
-const setFileUploadData = (e: React.ChangeEvent<HTMLInputElement>) => {
-  fileUploadData = e?.target?.files?.[0];
-};
-
-const run = () => {
-  if (fileUploadData && rootNode) {
-    parseXLS(fileUploadData, cb);
-  }
 };
 
 const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
@@ -42,34 +34,53 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
   return graph;
 };
 
-const cb = (data: ExcelData | undefined) => {
+const cb = (data: ExcelData | undefined, e: any) => {
   if (data) {
     const graph = parseXlsAsTree(data);
     if (rootNode) {
       createPresentation(graph, rootNode);
     }
   }
-};
-function Uploader() {
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFileUploadData(event);
-  };
 
+  onChange({
+    file: {
+      status: "done",
+      name: data?.fileName,
+      response: JSON.stringify({ status: "success" }),
+    },
+    event: { success: true },
+  });
+};
+
+const onChange = (info) => {
+  const { status } = info.file;
+  if (status !== "uploading") {
+    console.log(info.file, info.fileList);
+  }
+  if (status === "done") {
+    message.success(`${info.file.name} file uploaded successfully.`);
+  } else if (status === "error" || !status) {
+    message.error(`${info.file.name} file upload failed.`);
+  }
+};
+const beforeUpload = () => {
+  return !!rootNode;
+};
+
+function Uploader() {
   return (
     <form encType="multipart/form-data">
-      <input
-        id="upload"
-        type="file"
-        name="files[]"
-        onChange={handleFileChange}
-      />
-      <input
+      <Input
         type="text"
         name="name"
-        placeholder="מאיפה להתחיל? "
+        placeholder="מאיפה להתחיל?"
         onChange={setRootNodeName}
       />
-      <input type="button" value="סע" onClick={run} />
+      <Upload
+        action={(e) => parseXLS(e.file, cb)}
+        onChange={onChange}
+        beforeUpload={beforeUpload}
+      />
     </form>
   );
 }
