@@ -1,12 +1,8 @@
 import * as TreeCreator from "./BasicPPT";
-const graph = {
-  aaa: ["bbb", "ccc"],
-  bbb: ["ddd", "gggg"],
-  ccc: ["eee", "mmm"],
-  ddd: ["fff"],
-};
-const root = "aaa";
 
+export interface Graph {
+  [key: string]: string[];
+}
 const createOutputFilename = () => {
   const now = new Date();
   return `visualized-${now.getDate()}${
@@ -14,15 +10,23 @@ const createOutputFilename = () => {
   }${now.getFullYear()}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}.pptx`;
 };
 
+export function createPresentation(graph: Graph, root: string) {
+  TreeCreator.CreateTree(graph, root).writeFile({
+    fileName: createOutputFilename(),
+  });
+}
+
 function App() {
-  function runDemo() {
-    TreeCreator.CreateTree(graph, root).writeFile({
-      fileName: createOutputFilename(),
-    });
-  }
+  const graph = {
+    aaa: ["bbb", "ccc"],
+    bbb: ["ddd", "gggg"],
+    ccc: ["eee", "mmm"],
+    ddd: ["fff"],
+  };
+  const root = "aaa";
 
   return (
-    <button type="button" onClick={(_ev) => runDemo()}>
+    <button type="button" onClick={(_ev) => createPresentation(graph, root)}>
       Create PPT
     </button>
   );
