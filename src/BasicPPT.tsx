@@ -1,4 +1,5 @@
 import pptxgen from "pptxgenjs";
+import { NamesMapper } from "./Uploader";
 
 export interface NodeProp {
   [name: string]: string[];
@@ -30,7 +31,15 @@ const normalize = (value: number, min: number, max: number) => {
   return ((value - min) / (max - min)) * 100;
 };
 
-export const CreateTree = (graph: NodeProp, start: string) => {
+export const CreateTree = ({
+  graph,
+  namesMapper,
+  start,
+}: {
+  graph: NodeProp;
+  namesMapper: NamesMapper;
+  start: string;
+}) => {
   let pptx = new pptxgen();
   let slide = pptx.addSlide();
   let level = 0;
@@ -61,19 +70,32 @@ export const CreateTree = (graph: NodeProp, start: string) => {
     while (subarr.length) {
       let vertex = subarr.pop();
       // @ts-ignore
-      createNode(vertex, slide, pptx, levelMap);
+      createNode({ data: vertex, slide, pptxgen: pptx, levelMap, namesMapper });
     }
   }
   return pptx;
 };
 
-const createNode = (
-  data: { name: string; level: number; levelIdx: number },
-  slide: pptxgen.Slide,
-  pptxgen: pptxgen,
-  levelMap: LevelMap
-) => {
-  slide.addText(`${data.name}-${data.level}`, {
+interface NodeData {
+  name: string;
+  level: number;
+  levelIdx: number;
+}
+
+const createNode = ({
+  data,
+  pptxgen,
+  levelMap,
+  slide,
+  namesMapper,
+}: {
+  data: NodeData;
+  slide: pptxgen.Slide;
+  pptxgen: pptxgen;
+  levelMap: LevelMap;
+  namesMapper: NamesMapper;
+}) => {
+  slide.addText(`${namesMapper[data.name]}-${data.level}`, {
     rtlMode: true,
     align: pptxgen.AlignH.center,
     shape: pptxgen.ShapeType.roundRect,

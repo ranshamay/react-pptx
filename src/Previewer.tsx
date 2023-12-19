@@ -1,5 +1,5 @@
 import * as TreeCreator from "./BasicPPT";
-
+import { NamesMapper } from "./Uploader";
 export interface Graph {
   [key: string]: string[];
 }
@@ -10,8 +10,16 @@ const createOutputFilename = () => {
   }${now.getFullYear()}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}.pptx`;
 };
 
-export function createPresentation(graph: Graph, root: string) {
-  TreeCreator.CreateTree(graph, root).writeFile({
+export function createPresentation({
+  graph,
+  namesMapper,
+  root,
+}: {
+  graph: Graph;
+  namesMapper: NamesMapper;
+  root: string;
+}) {
+  TreeCreator.CreateTree({ graph, namesMapper, start: root }).writeFile({
     fileName: createOutputFilename(),
   });
 }

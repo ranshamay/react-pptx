@@ -11,6 +11,11 @@ const setRootNodeName = (e: React.FormEvent<HTMLInputElement>) => {
   rootNode = e?.currentTarget.value;
 };
 
+export interface NamesMapper {
+  [key: string]: string;
+}
+const namesMapper: NamesMapper = {};
+
 const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
   const graph: Graph = {};
   if (data) {
@@ -19,7 +24,13 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
     sheetNames.forEach((sheetName) => {
       const sheet = sheets[sheetName];
       sheet.forEach((row) => {
-        const keys = row.filter((v, idx) => idx % 2 === 0);
+        const keys = [...Array(row.length / 2).keys()].map((v, idx) => {
+          if (row[idx * 2]) {
+            namesMapper[row[idx * 2]] = row[idx * 2 + 1];
+            return row[idx * 2];
+          }
+        });
+
         keys.forEach((key, idx) => {
           if (idx < keys.length - 1) {
             if (!graph[key]) {
@@ -38,7 +49,7 @@ const cb = (data: ExcelData | undefined, e: any) => {
   if (data) {
     const graph = parseXlsAsTree(data);
     if (rootNode) {
-      createPresentation(graph, rootNode);
+      createPresentation({ graph, namesMapper, root: rootNode });
     }
   }
 
