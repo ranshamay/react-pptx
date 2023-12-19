@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react";
 import { parseXLS, ExcelData } from "./xlsParser";
 import { createPresentation, Graph } from "./Previewer";
@@ -6,9 +5,13 @@ import { message, Input } from "antd";
 
 import Upload from "./components/Upload";
 let rootNode: string | undefined = undefined;
+let heirarchyLevel = 0;
 
 const setRootNodeName = (e: React.FormEvent<HTMLInputElement>) => {
   rootNode = e?.currentTarget.value;
+};
+const setRootHeirarchyLevelName = (e: React.FormEvent<HTMLInputElement>) => {
+  heirarchyLevel = +e?.currentTarget.value;
 };
 
 export interface NamesMapper {
@@ -24,7 +27,7 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
     sheetNames.forEach((sheetName) => {
       const sheet = sheets[sheetName];
       sheet.forEach((row) => {
-        const keys = [...Array(row.length / 2).keys()].map((v, idx) => {
+        const keys = Array.apply(null, Array(row.length / 2)).map((_, idx) => {
           if (row[idx * 2]) {
             namesMapper[row[idx * 2]] = row[idx * 2 + 1];
             return row[idx * 2];
@@ -33,10 +36,10 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
 
         keys.forEach((key, idx) => {
           if (idx < keys.length - 1) {
-            if (!graph[key]) {
-              graph[key] = [];
+            if (!graph[`${key}`]) {
+              graph[`${key}`] = [];
             }
-            graph[key].push(keys[idx + 1]);
+            graph[`${key}`].push(keys[`${idx + 1}`]!);
           }
         });
       });
@@ -45,11 +48,16 @@ const parseXlsAsTree = (data: ExcelData | undefined): Graph => {
   return graph;
 };
 
-const cb = (data: ExcelData | undefined, e: any) => {
+const cb = (data: ExcelData | undefined) => {
   if (data) {
     const graph = parseXlsAsTree(data);
     if (rootNode) {
-      createPresentation({ graph, namesMapper, root: rootNode });
+      createPresentation({
+        graph,
+        namesMapper,
+        root: rootNode,
+        heirarchyLevel,
+      });
     }
   }
 
@@ -63,7 +71,7 @@ const cb = (data: ExcelData | undefined, e: any) => {
   });
 };
 
-const onChange = (info) => {
+const onChange = (info: any) => {
   const { status } = info.file;
   if (status !== "uploading") {
     console.log(info.file, info.fileList);
@@ -83,12 +91,16 @@ function Uploader() {
     <form encType="multipart/form-data">
       <Input
         type="text"
-        name="name"
         placeholder="מאיפה להתחיל?"
         onChange={setRootNodeName}
       />
+      <Input
+        type="text"
+        placeholder="רמת היררכיה"
+        onChange={setRootHeirarchyLevelName}
+      />
       <Upload
-        action={(e) => parseXLS(e.file, cb)}
+        action={(e: any) => parseXLS(e.file, cb)}
         onChange={onChange}
         beforeUpload={beforeUpload}
       />

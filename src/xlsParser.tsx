@@ -9,7 +9,7 @@ export interface ExcelData {
 }
 const parseXLS = async (
   file: File,
-  cb: (data: ExcelData | undefined) => any
+  cb: (data: ExcelData | undefined) => void
 ) => {
   const excelData: ExcelData = { fileName: file.name, sheets: {} };
 

@@ -1,114 +1,34 @@
 import pptxgen from "pptxgenjs";
 import { NamesMapper } from "./Uploader";
-
+import { extractTreeLevels, drawSubTree } from "./utils/tree";
 export interface NodeProp {
   [name: string]: string[];
 }
-
-type LevelMap = {
-  [key: string]: number;
-};
-
-const LEFT = 0;
-const RIGHT = 10;
-
-const TOP = 0;
-const BOTTOM = 10;
-
-const SHAPE_WIDTH = 1.5;
-const SHAPE_HEIGHT = 0.8;
-
-const normalizeX = (value: number) => {
-  const x = normalize(value, LEFT, RIGHT);
-  console.log(x);
-  return x;
-};
-const normalizeY = (value: number) => {
-  return normalize(value, TOP, BOTTOM);
-};
-
-const normalize = (value: number, min: number, max: number) => {
-  return ((value - min) / (max - min)) * 100;
-};
 
 export const CreateTree = ({
   graph,
   namesMapper,
   start,
+  heirarchyLevel,
 }: {
   graph: NodeProp;
   namesMapper: NamesMapper;
   start: string;
+  heirarchyLevel: number;
 }) => {
   let pptx = new pptxgen();
-  let slide = pptx.addSlide();
-  let level = 0;
-  const levelMap: LevelMap = { 0: 1 };
-  const queue = [{ name: start, level, levelIdx: 0 }];
-  while (queue.length) {
-    const subarr = [];
-    let n = queue.length;
-    levelMap[`${level}`] = n;
-    level++;
-    for (let levelIdx = 0; levelIdx < n; levelIdx++) {
-      let vertex = queue.shift();
-      subarr.push(vertex);
-      // @ts-ignore
-      if (graph?.[vertex.name]) {
-        // @ts-ignore
-        // eslint-disable-next-line no-loop-func
-        graph[vertex!.name]?.map((x, idx) =>
-          queue.push({
-            name: x,
-            level,
-            levelIdx: idx,
-          })
-        );
-      }
-    }
-
-    while (subarr.length) {
-      let vertex = subarr.pop();
-      // @ts-ignore
-      createNode({ data: vertex, slide, pptxgen: pptx, levelMap, namesMapper });
-    }
-  }
-  return pptx;
-};
-
-interface NodeData {
-  name: string;
-  level: number;
-  levelIdx: number;
-}
-
-const createNode = ({
-  data,
-  pptxgen,
-  levelMap,
-  slide,
-  namesMapper,
-}: {
-  data: NodeData;
-  slide: pptxgen.Slide;
-  pptxgen: pptxgen;
-  levelMap: LevelMap;
-  namesMapper: NamesMapper;
-}) => {
-  slide.addText(`${namesMapper[data.name]}-${data.level}`, {
-    rtlMode: true,
-    align: pptxgen.AlignH.center,
-    shape: pptxgen.ShapeType.roundRect,
-    rectRadius: 0.2,
-    x: `${normalizeX(
-      (RIGHT - LEFT) / 2 +
-        levelMap[data.level] -
-        SHAPE_WIDTH * (data.levelIdx + 1) -
-        SHAPE_WIDTH / 2
-    )}%`,
-    y: `${normalizeY(data.level * SHAPE_HEIGHT * 2)}%`,
-    w: SHAPE_WIDTH,
-    h: SHAPE_HEIGHT,
-    fill: { color: pptxgen.SchemeColor.accent1 },
+  const levels = extractTreeLevels({ graph, root: start });
+  (levels[heirarchyLevel] || levels[0]).nodes.forEach((subroot) => {
+    let slide = pptx.addSlide();
+    drawSubTree({
+      root: subroot.name,
+      graph,
+      slide,
+      namesMapper,
+      pptx,
+      levelMap: levels,
+    });
   });
+
+  return pptx;
 };

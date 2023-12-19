@@ -14,12 +14,19 @@ export function createPresentation({
   graph,
   namesMapper,
   root,
+  heirarchyLevel,
 }: {
   graph: Graph;
   namesMapper: NamesMapper;
   root: string;
+  heirarchyLevel: number;
 }) {
-  TreeCreator.CreateTree({ graph, namesMapper, start: root }).writeFile({
+  TreeCreator.CreateTree({
+    graph,
+    namesMapper,
+    start: root,
+    heirarchyLevel,
+  }).writeFile({
     fileName: createOutputFilename(),
   });
 }
